@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Download } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,17 +25,54 @@ export const ProfileCard = ({ username, bio, imageUrl }: ProfileCardProps) => {
     setTimeout(() => setCopiedField(null), 2000);
   };
 
+  const downloadImage = async () => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${username}-profile.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Download iniciado!",
+        description: "A imagem está sendo baixada.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro no download",
+        description: "Não foi possível baixar a imagem.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white">
       <CardContent className="p-6">
         <div className="flex flex-col items-center text-center space-y-4">
           {/* Profile Image */}
-          <Avatar className="w-24 h-24 border-4 border-primary/20">
-            <AvatarImage src={imageUrl} alt={username} />
-            <AvatarFallback className="text-2xl bg-gradient-vibrant text-white">
-              {username.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative group">
+            <Avatar className="w-24 h-24 border-4 border-primary/20">
+              <AvatarImage src={imageUrl} alt={username} />
+              <AvatarFallback className="text-2xl bg-gradient-vibrant text-white">
+                {username.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={downloadImage}
+              className="absolute -bottom-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity h-8 px-3"
+            >
+              <Download className="h-3 w-3 mr-1" />
+              <span className="text-xs">Baixar</span>
+            </Button>
+          </div>
 
           {/* Username */}
           <div className="w-full">

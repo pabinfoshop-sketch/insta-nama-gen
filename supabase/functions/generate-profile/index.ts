@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { keyword } = await req.json();
+    const { keyword, shortNames = false, count = 3 } = await req.json();
 
     if (!keyword) {
       return new Response(
@@ -26,12 +26,15 @@ serve(async (req) => {
       );
     }
 
+    // Validate count
+    const validCount = Math.min(Math.max(count, 3), 100);
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log(`Generating profiles for keyword: ${keyword}`);
+    console.log(`Generating ${validCount} profiles for keyword: ${keyword} (shortNames: ${shortNames})`);
 
     // Generate usernames and bios
     const textResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -49,7 +52,7 @@ serve(async (req) => {
           },
           {
             role: "user",
-            content: `Gere 3 sugestões de perfis do Instagram baseados na palavra-chave: "${keyword}". Para cada perfil, retorne em JSON com o formato:
+            content: `Gere ${validCount} sugestões de perfis do Instagram baseados na palavra-chave: "${keyword}". Para cada perfil, retorne em JSON com o formato:
 {
   "suggestions": [
     {
@@ -58,7 +61,8 @@ serve(async (req) => {
     }
   ]
 }
-Os nomes de usuário devem ser únicos, criativos e relacionados à palavra-chave. As biografias devem ser atraentes e usar emojis quando apropriado.`,
+${shortNames ? "IMPORTANTE: Os nomes de usuário devem ser CURTOS (máximo 12 caracteres), simples e fáceis de lembrar." : "Os nomes de usuário devem ser únicos e criativos."}
+Todos os nomes devem ser relacionados à palavra-chave. As biografias devem ser atraentes e usar emojis quando apropriado.`,
           },
         ],
         tools: [
