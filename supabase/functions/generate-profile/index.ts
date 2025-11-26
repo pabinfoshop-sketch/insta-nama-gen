@@ -140,7 +140,7 @@ Todos os nomes devem ser relacionados à palavra-chave. As biografias devem ser 
             messages: [
               {
                 role: "user",
-                content: `Create a professional, modern Instagram profile picture that represents the theme: "${keyword}". Style: clean, vibrant, and suitable for social media. Square format.`,
+                content: `Create a professional, business-oriented Instagram profile picture for sales/commerce related to: "${keyword}". Style: Corporate, trustworthy, modern, professional branding. Use business colors (blue, green, gray tones). Include elements suggesting success, growth, sales, commerce. Clean, minimalist design suitable for a professional sales profile. Square format, high quality.`,
               },
             ],
             modalities: ["image"],
