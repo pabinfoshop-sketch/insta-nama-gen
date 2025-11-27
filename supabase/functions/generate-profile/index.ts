@@ -167,7 +167,7 @@ Todos os nomes devem ser relacionados à palavra-chave. As biografias devem ser 
             messages: [
               {
                 role: "user",
-                content: `Crie uma imagem de perfil para Instagram com elementos visuais relacionados a "${profile.username}". Estilo: ${styleDesc}. Use ${colorDesc}. IMPORTANTE: Imagem totalmente preenchida, sem espaços vazios, composição rica e completa. Design impactante, alta qualidade, formato quadrado. Ultra atraente!`,
+                content: `Imagem de perfil Instagram: "${profile.username}". ${styleDesc}, ${colorDesc}, composição completa sem espaços vazios, formato quadrado.`,
               },
             ],
             modalities: ["image"],
