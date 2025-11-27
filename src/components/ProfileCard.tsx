@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Copy, Check, Download } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -9,9 +10,11 @@ interface ProfileCardProps {
   username: string;
   bio: string;
   imageUrl: string;
+  isSelected?: boolean;
+  onSelect?: (selected: boolean) => void;
 }
 
-export const ProfileCard = ({ username, bio, imageUrl }: ProfileCardProps) => {
+export const ProfileCard = ({ username, bio, imageUrl, isSelected, onSelect }: ProfileCardProps) => {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -52,7 +55,16 @@ export const ProfileCard = ({ username, bio, imageUrl }: ProfileCardProps) => {
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white">
+    <Card className={`overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white relative ${isSelected ? 'ring-2 ring-primary' : ''}`}>
+      {onSelect && (
+        <div className="absolute top-3 right-3 z-10">
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={onSelect}
+            className="bg-white shadow-md"
+          />
+        </div>
+      )}
       <CardContent className="p-6">
         <div className="flex flex-col items-center text-center space-y-4">
           {/* Profile Image */}
