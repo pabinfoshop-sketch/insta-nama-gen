@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ProfileSuggestion {
   username: string;
@@ -21,6 +22,8 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [shortNames, setShortNames] = useState(false);
   const [profileCount, setProfileCount] = useState([5]);
+  const [imageStyle, setImageStyle] = useState("vibrant");
+  const [colorPalette, setColorPalette] = useState("neon");
   const { toast } = useToast();
 
   const handleGenerate = async () => {
@@ -42,6 +45,8 @@ const Index = () => {
           keyword: keyword.trim(),
           shortNames,
           count: profileCount[0],
+          imageStyle,
+          colorPalette,
         },
       });
 
@@ -153,6 +158,47 @@ const Index = () => {
                     className="w-full"
                   />
                   <p className="text-sm text-white/70">De 3 até 100 perfis por geração</p>
+                </div>
+
+                {/* Image Style Selector */}
+                <div className="space-y-3">
+                  <Label htmlFor="image-style" className="text-white font-medium">
+                    Estilo de Design
+                  </Label>
+                  <Select value={imageStyle} onValueChange={setImageStyle} disabled={isLoading}>
+                    <SelectTrigger id="image-style" className="bg-white/95 border-none">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="professional">Profissional/Corporativo</SelectItem>
+                      <SelectItem value="vibrant">Vibrante/Colorido</SelectItem>
+                      <SelectItem value="minimalist">Minimalista/Clean</SelectItem>
+                      <SelectItem value="creative">Criativo/Artístico</SelectItem>
+                      <SelectItem value="modern">Moderno/Tech</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-white/70">Escolha o estilo visual das imagens</p>
+                </div>
+
+                {/* Color Palette Selector */}
+                <div className="space-y-3">
+                  <Label htmlFor="color-palette" className="text-white font-medium">
+                    Paleta de Cores
+                  </Label>
+                  <Select value={colorPalette} onValueChange={setColorPalette} disabled={isLoading}>
+                    <SelectTrigger id="color-palette" className="bg-white/95 border-none">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="warm">🔥 Cores Quentes</SelectItem>
+                      <SelectItem value="cool">❄️ Cores Frias</SelectItem>
+                      <SelectItem value="neon">⚡ Neon/Elétrico</SelectItem>
+                      <SelectItem value="pastel">🌸 Pastel</SelectItem>
+                      <SelectItem value="monochrome">⚫ Monocromático</SelectItem>
+                      <SelectItem value="rainbow">🌈 Arco-íris</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-white/70">Defina as cores principais das imagens</p>
                 </div>
               </div>
             </div>

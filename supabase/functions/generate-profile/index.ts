@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { keyword, shortNames = false, count = 3 } = await req.json();
+    const { keyword, shortNames = false, count = 3, imageStyle = "vibrant", colorPalette = "neon" } = await req.json();
 
     if (!keyword) {
       return new Response(
@@ -34,7 +34,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log(`Generating ${validCount} profiles for keyword: ${keyword} (shortNames: ${shortNames})`);
+    console.log(`Generating ${validCount} profiles for keyword: ${keyword} (shortNames: ${shortNames}, style: ${imageStyle}, colors: ${colorPalette})`);
 
     // Generate usernames and bios
     const textResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -131,6 +131,27 @@ Todos os nomes devem ser relacionados à palavra-chave. As biografias devem ser 
     // Generate profile images for each username
     const suggestions: ProfileSuggestion[] = [];
 
+    // Generate style and color descriptions
+    const styleDescriptions: Record<string, string> = {
+      professional: "Profissional, corporativo, confiável, clean e moderno",
+      vibrant: "Vibrante, colorido, energético, alegre e chamativo",
+      minimalist: "Minimalista, clean, simples, elegante e sofisticado",
+      creative: "Criativo, artístico, único, expressivo e inovador",
+      modern: "Moderno, tech, futurista, digital e contemporâneo"
+    };
+
+    const colorDescriptions: Record<string, string> = {
+      warm: "cores quentes (vermelho, laranja, amarelo, coral)",
+      cool: "cores frias (azul, roxo, verde, turquesa)",
+      neon: "cores neon vibrantes (rosa neon, laranja elétrico, amarelo limão, azul elétrico, verde neon)",
+      pastel: "cores pastel suaves (rosa claro, azul bebê, lavanda, pêssego)",
+      monochrome: "tons monocromáticos elegantes (preto, branco, cinza)",
+      rainbow: "todas as cores do arco-íris (vermelho, laranja, amarelo, verde, azul, índigo, violeta)"
+    };
+
+    const styleDesc = styleDescriptions[imageStyle] || styleDescriptions.vibrant;
+    const colorDesc = colorDescriptions[colorPalette] || colorDescriptions.neon;
+
     for (const profile of profiles.suggestions) {
       try {
         console.log(`Generating image for username: ${profile.username}`);
@@ -146,7 +167,7 @@ Todos os nomes devem ser relacionados à palavra-chave. As biografias devem ser 
             messages: [
               {
                 role: "user",
-                content: `Crie uma imagem vibrante e colorida de perfil para Instagram sobre: "${keyword}". Estilo: Cores RADIANTES e VIBRANTES (use rosa, laranja, roxo, amarelo neon, azul elétrico, verde limão). Design moderno, alegre, chamativo e cheio de energia. Gradientes coloridos, elementos brilhantes. Alta qualidade, formato quadrado. Ultra colorido e impactante!`,
+                content: `Crie uma imagem de perfil para Instagram sobre: "${keyword}". Estilo: ${styleDesc}. Use ${colorDesc}. Design impactante, alta qualidade, formato quadrado. Ultra atraente!`,
               },
             ],
             modalities: ["image"],
