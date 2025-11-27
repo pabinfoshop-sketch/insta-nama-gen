@@ -150,14 +150,14 @@ const Index = () => {
                   <Slider
                     id="profile-count"
                     min={3}
-                    max={100}
+                    max={50}
                     step={1}
                     value={profileCount}
                     onValueChange={setProfileCount}
                     disabled={isLoading}
                     className="w-full"
                   />
-                  <p className="text-sm text-white/70">De 3 até 100 perfis por geração</p>
+                  <p className="text-sm text-white/70">De 3 até 50 perfis por geração</p>
                 </div>
 
                 {/* Image Style Selector */}
