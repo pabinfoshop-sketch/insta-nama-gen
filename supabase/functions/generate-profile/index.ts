@@ -116,11 +116,17 @@ Todos os nomes devem ser relacionados à palavra-chave. As biografias devem ser 
 
     const toolCall = textData.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) {
+      console.error("No tool call in response:", JSON.stringify(textData));
       throw new Error("No tool call found in response");
     }
 
     const profiles = JSON.parse(toolCall.function.arguments);
     console.log("Generated profiles:", JSON.stringify(profiles));
+
+    if (!profiles.suggestions || !Array.isArray(profiles.suggestions)) {
+      console.error("Invalid profiles format:", JSON.stringify(profiles));
+      throw new Error("Invalid profiles format returned");
+    }
 
     // Generate profile images for each username
     const suggestions: ProfileSuggestion[] = [];
@@ -148,7 +154,8 @@ Todos os nomes devem ser relacionados à palavra-chave. As biografias devem ser 
         });
 
         if (!imageResponse.ok) {
-          console.error(`Image generation failed for ${profile.username}: ${imageResponse.status}`);
+          const errorText = await imageResponse.text();
+          console.error(`Image generation failed for ${profile.username}: ${imageResponse.status} - ${errorText}`);
           // Use a placeholder if image generation fails
           suggestions.push({
             ...profile,
@@ -158,14 +165,17 @@ Todos os nomes devem ser relacionados à palavra-chave. As biografias devem ser 
         }
 
         const imageData = await imageResponse.json();
+        console.log(`Image data for ${profile.username}:`, JSON.stringify(imageData));
         const imageUrl = imageData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
         if (imageUrl) {
+          console.log(`Successfully generated image for ${profile.username}`);
           suggestions.push({
             ...profile,
             imageUrl,
           });
         } else {
+          console.error(`No image URL found for ${profile.username}`);
           // Fallback to placeholder
           suggestions.push({
             ...profile,
@@ -190,8 +200,15 @@ Todos os nomes devem ser relacionados à palavra-chave. As biografias devem ser 
     );
   } catch (error) {
     console.error("Error in generate-profile function:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : "";
+    console.error("Error stack:", errorStack);
+    
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ 
+        error: errorMessage,
+        details: errorStack 
+      }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
