@@ -56,9 +56,12 @@ const Index = () => {
       }
     } catch (error: any) {
       console.error("Error generating profiles:", error);
+      const errorMsg = error.message || "Tente novamente mais tarde.";
+      const errorDetails = error.details || "";
+      
       toast({
         title: "Erro ao gerar perfis",
-        description: error.message || "Tente novamente mais tarde.",
+        description: errorMsg + (errorDetails ? ` - ${errorDetails.substring(0, 100)}` : ""),
         variant: "destructive",
       });
     } finally {
