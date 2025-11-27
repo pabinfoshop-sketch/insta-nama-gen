@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProfileCard } from "@/components/ProfileCard";
-import { Instagram, Sparkles, Loader2 } from "lucide-react";
+import { Instagram, Sparkles, Loader2, Share2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
@@ -24,6 +24,7 @@ const Index = () => {
   const [profileCount, setProfileCount] = useState([5]);
   const [imageStyle, setImageStyle] = useState("vibrant");
   const [colorPalette, setColorPalette] = useState("neon");
+  const [selectedProfiles, setSelectedProfiles] = useState<Set<number>>(new Set());
   const { toast } = useToast();
 
   const handleGenerate = async () => {
@@ -38,6 +39,7 @@ const Index = () => {
 
     setIsLoading(true);
     setSuggestions([]);
+    setSelectedProfiles(new Set());
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-profile", {
@@ -72,6 +74,57 @@ const Index = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const toggleProfileSelection = (index: number) => {
+    setSelectedProfiles(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
+  const handleShare = async () => {
+    const selected = Array.from(selectedProfiles).map(i => suggestions[i]);
+    
+    const shareText = selected.map(profile => 
+      `@${profile.username}\n${profile.bio}\n`
+    ).join('\n---\n\n');
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Perfis do Instagram',
+          text: shareText,
+        });
+        toast({
+          title: "Compartilhado!",
+          description: `${selected.length} perfil(is) compartilhado(s).`,
+        });
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          copyToClipboard(shareText);
+        }
+      }
+    } else {
+      copyToClipboard(shareText);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copiado!",
+      description: `${selectedProfiles.size} perfil(is) copiado(s) para área de transferência.`,
+    });
+  };
+
+  const clearSelection = () => {
+    setSelectedProfiles(new Set());
   };
 
   return (
@@ -218,8 +271,39 @@ const Index = () => {
                   username={suggestion.username}
                   bio={suggestion.bio}
                   imageUrl={suggestion.imageUrl}
+                  isSelected={selectedProfiles.has(index)}
+                  onSelect={(selected) => toggleProfileSelection(index)}
                 />
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Floating Share Bar */}
+        {selectedProfiles.size > 0 && (
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4">
+            <div className="bg-white/95 backdrop-blur-lg rounded-full shadow-2xl border border-primary/20 px-6 py-4 flex items-center gap-4">
+              <span className="text-sm font-medium text-foreground">
+                {selectedProfiles.size} perfil(is) selecionado(s)
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleShare}
+                  size="sm"
+                  className="rounded-full"
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Compartilhar
+                </Button>
+                <Button
+                  onClick={clearSelection}
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-full"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         )}
