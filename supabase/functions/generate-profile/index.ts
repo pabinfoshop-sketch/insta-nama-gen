@@ -27,7 +27,7 @@ serve(async (req) => {
     }
 
     // Validate count
-    const validCount = Math.min(Math.max(count, 3), 100);
+    const validCount = Math.min(Math.max(count, 3), 50);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
