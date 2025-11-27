@@ -146,7 +146,7 @@ Todos os nomes devem ser relacionados à palavra-chave. As biografias devem ser 
             messages: [
               {
                 role: "user",
-                content: `Create a professional, business-oriented Instagram profile picture for sales/commerce related to: "${keyword}". Style: Corporate, trustworthy, modern, professional branding. Use business colors (blue, green, gray tones). Include elements suggesting success, growth, sales, commerce. Clean, minimalist design suitable for a professional sales profile. Square format, high quality.`,
+                content: `Crie uma imagem vibrante e colorida de perfil para Instagram sobre: "${keyword}". Estilo: Cores RADIANTES e VIBRANTES (use rosa, laranja, roxo, amarelo neon, azul elétrico, verde limão). Design moderno, alegre, chamativo e cheio de energia. Gradientes coloridos, elementos brilhantes. Alta qualidade, formato quadrado. Ultra colorido e impactante!`,
               },
             ],
             modalities: ["image"],
