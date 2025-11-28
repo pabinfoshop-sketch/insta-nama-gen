@@ -1,0 +1,90 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+interface ProfileSuggestion {
+  username: string;
+  bio: string;
+  imageUrl: string;
+}
+
+// Função utilitária para gerar nomes fictícios baseados na palavra-chave
+function generateUsernames(keyword: string, count: number, shortNames = false): string[] {
+  const base = keyword.replace(/\s+/g, '').toLowerCase();
+  const names: string[] = [];
+  for (let i = 0; i < count; i++) {
+    let suffix = Math.random().toString(36).substring(2, 6);
+    let uname = shortNames 
+      ? base.substring(0, 8) + suffix.substring(0, 4)
+      : base + suffix;
+    uname = uname.substring(0, shortNames ? 12 : 18); // limita tamanho
+    names.push(uname);
+  }
+  return names;
+}
+
+// Função utilitária para gerar bios fictícias
+function generateBios(keyword: string, count: number): string[] {
+  const templates = [
+    `🌟 Vivendo a vida com muito(a) ${keyword}!`,
+    `Apaixonado(a) por ${keyword}. Criando e inspirando sempre! ✨`,
+    `Aqui só tem energia boa e muita vibe de ${keyword}! 🙌`,
+    `Buscando novas aventuras no universo de ${keyword}. 🚀`,
+    `Sigo o flow com ${keyword} no coração! 💖`,
+    `Tudo é possível com ${keyword}!`
+  ];
+  // Retorna bios variadas até a quantidade pedida
+  return Array(count).fill(0).map((_, i) => 
+    templates[i % templates.length]
+  );
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { keyword, shortNames = false, count = 3, imageStyle = "vibrant", colorPalette = "neon" } = await req.json();
+
+    if (!keyword) {
+      return new Response(
+        JSON.stringify({ error: "Keyword is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Clamp count
+    const validCount = Math.min(Math.max(count, 3), 50);
+
+    // Gera sugestões localmente
+    const usernames = generateUsernames(keyword, validCount, shortNames);
+    const bios = generateBios(keyword, validCount);
+
+    const suggestions: ProfileSuggestion[] = usernames.map((username, i) => ({
+      username,
+      bio: bios[i % bios.length],
+      // Gera Avatar gratuito
+      imageUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}`
+    }));
+
+    return new Response(
+      JSON.stringify({ suggestions }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("Error in generate-profile function:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : "";
+    return new Response(
+      JSON.stringify({ 
+        error: errorMessage,
+        details: errorStack 
+      }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
